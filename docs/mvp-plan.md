@@ -1,20 +1,25 @@
-# Shopify Color Season Chrome Extension MVP Plan
+# Color Season Shopping Assistant Chrome Extension MVP Plan
 
 ## Product summary
 
-Build a gender-neutral Chrome extension that helps shoppers identify clothing on Shopify-powered ecommerce sites that matches their selected color season palette.
+Build a gender-neutral Chrome extension that helps shoppers identify clothing on ecommerce sites that matches their selected color season palette.
 
 The extension should act as a lightweight shopping assistant. It should say whether a product appears to fit the user's selected palette, not whether the item will objectively look good on the user.
 
+The core product should be platform-agnostic. Shopify should be treated as the first optimized compatibility target for the MVP, not as the long-term product boundary.
+
 ## Current MVP goals
 
-- Support generic English-language Shopify clothing stores.
+- Build a platform-agnostic color detection, scoring, and explanation engine.
+- Support generic English-language ecommerce product pages where enough text or metadata is available.
+- Treat Shopify as the first optimized target for product pages and collection/search page badging.
 - Let users choose one of four color seasons:
   - Spring
   - Summer
   - Autumn
   - Winter
-- Detect product cards and product pages on Shopify storefronts.
+- Detect product detail pages across ecommerce sites where possible.
+- Detect product cards and product pages on Shopify storefronts as the first enhanced compatibility path.
 - Extract likely product color information as best as possible from page data.
 - Badge products based on how well the detected color fits the selected palette.
 - Keep all user settings local to the browser extension.
@@ -31,7 +36,7 @@ The extension should act as a lightweight shopping assistant. It should say whet
 - Hiding or filtering products.
 - User overrides such as "I like this color anyway."
 - Non-English color extraction.
-- Non-Shopify ecommerce support.
+- Guaranteed support for every ecommerce platform or heavily customized storefront.
 - Strong claims about what looks best on a user.
 
 ## Recommended initial tech direction
@@ -42,10 +47,12 @@ The current recommendation is:
 - TypeScript.
 - Vite.
 - React for popup/options UI.
-- Content script for Shopify page scanning and badge injection.
+- Content script for page scanning and badge injection.
+- Platform-agnostic color extraction and scoring core.
+- Shopify-specific helper logic as the first adapter.
 - `chrome.storage.local` for local extension settings.
 
-This can be revisited before implementation, but it is a standard modern stack for a Chrome extension MVP.
+This can be revisited before implementation, but it is a standard modern stack for a Chrome extension MVP. The important architectural decision is to keep color detection and scoring independent from Shopify-specific page parsing.
 
 ## User experience
 
@@ -60,6 +67,17 @@ The user opens the extension popup and selects one color season:
 
 The MVP should not include a quiz. The user is responsible for choosing their season.
 
+### On generic ecommerce product pages
+
+When the user visits a supported product detail page:
+
+1. The content script looks for generic product signals such as page title, headings, JSON-LD product data, Open Graph metadata, selected options, visible color labels, URL slugs, and image alt text.
+2. The extension extracts likely product colors from available text and metadata.
+3. The extension scores the product against the selected palette.
+4. The extension displays a badge or product-level indicator when the signal is strong enough.
+
+This is the lower-friction platform-agnostic MVP surface. It should work on non-Shopify sites when their product metadata and page text expose useful color information.
+
 ### On Shopify collection pages
 
 When the user visits a supported Shopify collection/search page:
@@ -69,6 +87,8 @@ When the user visits a supported Shopify collection/search page:
 3. The extension compares the detected color against the selected palette.
 4. The extension displays a badge on or near each product card.
 
+Shopify collection badging is the first enhanced compatibility target because Shopify provides useful signals and a large set of stores to validate against, even though themes vary.
+
 ### On Shopify product pages
 
 When the user visits a product detail page:
@@ -76,6 +96,8 @@ When the user visits a product detail page:
 1. The extension extracts product title, available variant names, visible color labels, alt text, and other metadata where available.
 2. The extension scores the product against the selected palette.
 3. The extension displays a badge or product-level indicator.
+
+Shopify-specific product extraction should build on the generic product-page analyzer rather than bypass it.
 
 ## Badge states
 
@@ -113,6 +135,34 @@ Avoid wording:
 - "This is flattering for your complexion."
 - "You should not wear this."
 - Gendered fashion assumptions.
+
+## Architecture direction
+
+Keep the MVP architecture split between platform-independent product logic and site/platform extraction logic.
+
+Platform-independent core:
+
+- Color season data model.
+- Color alias normalization.
+- Dominant color candidate ranking.
+- Scoring and badge classification.
+- Explanation generation.
+
+Generic page extraction:
+
+- Product page title and headings.
+- URL slug parsing.
+- JSON-LD `Product` data.
+- Open Graph metadata.
+- Visible selected option text.
+- Image alt text.
+
+Platform adapters:
+
+- Start with a Shopify adapter for Shopify-specific product JSON, route detection, collection grids, and common product card patterns.
+- Add other ecommerce adapters later only when generic extraction is not enough.
+
+The generic extractor and scoring engine should be useful even when no platform adapter matches.
 
 ## Color season model
 
@@ -257,18 +307,29 @@ For the MVP, prioritize text-based extraction before image analysis.
 Potential sources:
 
 1. Product title.
-2. Product card visible text.
-3. Product URL slug.
-4. Variant option names.
-5. Color selector labels.
-6. Image alt text.
-7. Shopify product JSON or embedded structured data where available.
+2. Product page headings.
+3. Product card visible text.
+4. Product URL slug.
+5. Variant option names.
+6. Selected option labels.
+7. Color selector labels.
+8. Image alt text.
+9. JSON-LD `Product` structured data.
+10. Open Graph metadata.
+11. Shopify product JSON where available.
 
 The extension should identify known color names and aliases. Example:
 
 - "navy", "deep navy", and "clear navy" should map to season-specific navy concepts where possible.
 - "chocolate", "dark chocolate", and "chocolate brown" should map to brown.
 - Store-specific names like "espresso" or "moonstone" may require future alias expansion.
+
+Extraction should be layered:
+
+1. Run generic ecommerce extraction first.
+2. Add Shopify-specific extraction when Shopify signals are present.
+3. Merge and rank detected color candidates.
+4. Return `Color unknown` or `Possible match` when the signal is too weak or mixed.
 
 ## Dominant color approach
 
@@ -302,21 +363,29 @@ Example explanation:
 
 > Detected: rust. Rust is commonly recommended for Autumn palettes.
 
-## Shopify support expectations
+## Platform and Shopify support expectations
 
-The MVP should target generic Shopify stores, but Shopify theme variability is a known risk.
+The MVP should not assume Shopify is the only supported path. The core analyzer should attempt to work on generic ecommerce product pages using structured data and visible product text.
+
+Shopify remains the first optimized compatibility target because it offers useful detection signals and many clothing stores use it. Shopify theme variability is still a known risk.
 
 Useful detection signals may include:
 
+- JSON-LD `Product` structured data.
+- Open Graph product metadata.
+- Product-like URLs and page headings.
 - `window.Shopify`.
 - Shopify product URLs such as `/products/...`.
 - Shopify collection URLs such as `/collections/...`.
 - Shopify CDN image URLs.
 - Embedded product JSON.
-- JSON-LD structured data.
 - Common product card selectors.
 
-Large retailers may use Shopify in customized ways, or may use Shopify only for part of their commerce stack. Abercrombie can be investigated, but the MVP should be validated first against more standard Shopify clothing storefronts.
+Large retailers may use Shopify in customized ways, may use Shopify only for part of their commerce stack, or may not use Shopify at all. Abercrombie can be investigated, but the MVP should be validated first against:
+
+1. Standard Shopify clothing storefronts.
+2. A small set of non-Shopify product pages with useful metadata.
+3. A small set of low-signal pages where the expected result is `Color unknown` or `Possible match`.
 
 ## Privacy and data storage
 
@@ -357,9 +426,10 @@ For the MVP:
 
 ### Platform support
 
-- Add more ecommerce platforms.
+- Add platform adapters for more ecommerce platforms.
 - Add custom adapters for high-value stores.
 - Improve support for heavily customized Shopify themes.
+- Improve generic product-page detection for non-Shopify stores.
 
 ### Personalization
 
@@ -394,5 +464,5 @@ Persona prompts can help communicate the style of response desired, but they are
    - Current proposal: `Great match`, `Possible match`, `Less ideal`, `Color unknown`.
 2. Should badges use emoji/happy-face UI, text labels, or both?
 3. Should the MVP include hover/click explanations immediately, or should that wait until after the basic badges work?
-4. Should the first implementation include a small internal test fixture page for product cards?
-5. Which real Shopify stores should be used as the first compatibility test set?
+4. Should the first implementation include small internal test fixture pages for generic product pages and Shopify product cards?
+5. Which real Shopify and non-Shopify stores should be used as the first compatibility test set?
