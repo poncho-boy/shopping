@@ -1,6 +1,6 @@
-# Shopify Color Season Shopping Assistant
+# Color Season Shopping Assistant
 
-A gender-neutral Chrome extension concept for Shopify clothing stores. The extension will help shoppers badge products based on how closely a detected product color matches the shopper's selected color season palette.
+A gender-neutral Chrome extension concept for online clothing shopping. The extension will help shoppers badge products based on how closely a detected product color matches the shopper's selected color season palette.
 
 The goal is to act as a lightweight shopping assistant. It should describe whether an item appears to fit a selected palette, not make claims about whether the item will objectively look good on a person.
 
@@ -16,9 +16,12 @@ Start with the MVP plan:
 
 The initial product direction is:
 
-- Support generic English-language Shopify clothing stores.
+- Build a platform-agnostic color detection and scoring engine.
+- Support generic English-language ecommerce product pages where enough text or metadata is available.
+- Treat Shopify as the first optimized compatibility target for product pages and collection badges.
 - Let users choose Spring, Summer, Autumn, or Winter.
-- Detect Shopify product cards and product detail pages.
+- Detect product detail pages across ecommerce sites when possible.
+- Detect Shopify product cards and product detail pages as an enhanced MVP path.
 - Extract likely product colors from text and available page metadata.
 - Badge products as `Great match`, `Possible match`, `Less ideal`, or `Color unknown`.
 - Keep settings local to the browser extension.
@@ -32,7 +35,9 @@ The current recommended stack is:
 - TypeScript.
 - Vite.
 - React for popup/options UI.
-- Content scripts for Shopify page scanning and badge injection.
+- Content scripts for page scanning and badge injection.
+- A platform-agnostic extraction and scoring core.
+- Shopify-specific helpers as the first site/platform adapter.
 - `chrome.storage.local` for local settings.
 
 These choices can be revisited before implementation starts.
