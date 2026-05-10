@@ -6,7 +6,14 @@ The goal is to act as a lightweight shopping assistant. It should describe wheth
 
 ## Project status
 
-This repository is currently in MVP planning. No implementation code has been added yet.
+This repository now contains the first implementation slice for the MVP:
+
+- Manifest V3 Chrome extension shell.
+- TypeScript, Vite, and React popup UI.
+- Local selected-season storage with `chrome.storage.local`.
+- Platform-agnostic color season data, color alias extraction, scoring, badge states, and explanations.
+- Generic ecommerce product-page content script that uses page text and metadata.
+- Internal fixture coverage for product color extraction.
 
 Start with the MVP plan:
 
@@ -40,7 +47,24 @@ The current recommended stack is:
 - Shopify-specific helpers as the first site/platform adapter.
 - `chrome.storage.local` for local settings.
 
-These choices can be revisited before implementation starts.
+These choices should continue to be revisited as the MVP expands.
+
+## Local development
+
+Install dependencies:
+
+```sh
+npm install
+```
+
+Run checks:
+
+```sh
+npm test
+npm run build
+```
+
+Load the built extension from `dist/` in Chrome's extension developer mode.
 
 ## Privacy principles
 
