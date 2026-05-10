@@ -69,7 +69,7 @@ const seasonColorRules: Record<
       "icy pink"
     ]),
     neutral: new Set(["true black", "crisp white", "cool gray", "deep navy"]),
-    avoid: new Set(["earthy orange", "beige", "warm beige", "mustard yellow", "mustard"])
+    avoid: new Set(["earthy orange", "rust", "beige", "warm beige", "mustard yellow", "mustard"])
   }
 };
 
