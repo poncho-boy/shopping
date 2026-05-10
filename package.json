@@ -1,0 +1,29 @@
+{
+  "name": "color-season-shopping-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Manifest V3 Chrome extension MVP for palette-focused ecommerce color season badging.",
+  "scripts": {
+    "build": "npm run typecheck && npm run build:popup && npm run build:content",
+    "build:popup": "vite build --config vite.popup.config.ts",
+    "build:content": "vite build --config vite.content.config.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.42",
+    "@types/node": "^25.6.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "jsdom": "^29.1.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.11",
+    "vitest": "^4.1.5"
+  }
+}

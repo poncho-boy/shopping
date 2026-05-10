@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Color Season Shopping Assistant",
+  "description": "Badges ecommerce products based on text-detected colors and a selected color season palette.",
+  "version": "0.1.0",
+  "permissions": ["storage"],
+  "action": {
+    "default_title": "Color Season Shopping Assistant",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
